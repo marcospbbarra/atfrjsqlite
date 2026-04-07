@@ -26,7 +26,6 @@ class CadastroController extends Controller
                 'formacao' => ['required', 'string', 'max:255'],
                 'autorizacao_lgpd' => ['required', 'boolean'],
                 'autorizacao_mailing' => ['nullable', 'boolean'],
-                'status' => ['required', 'string', 'max:15'],
             ],
             attributes: [
                 'ano_filiacao' => 'ano de filiação',
@@ -38,6 +37,7 @@ class CadastroController extends Controller
 
         $validated['autorizacao_lgpd'] = $request->boolean('autorizacao_lgpd');
         $validated['autorizacao_mailing'] = $request->boolean('autorizacao_mailing');
+        $validated['status'] = 'adicionado';
 
         Cadastro::create($validated);
 

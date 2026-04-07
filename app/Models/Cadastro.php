@@ -25,6 +25,10 @@ class Cadastro extends Model
 
     protected $table = 'cadastro';
 
+    protected $attributes = [
+        'status' => 'adicionado',
+    ];
+
     /**
      * Get the attributes that should be cast.
      *

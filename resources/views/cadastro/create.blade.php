@@ -13,7 +13,7 @@
     <div class="col-12">
         <div class="feature-tile p-3 h-100">
             <div class="small text-uppercase aside-accent mb-2" style="letter-spacing:.15em">Atualize seus dados</div>
-            <div class="fw-semibold">Mantenha seus dados visíveis no site</div>
+            <div class="fw-semibold">Agora, a nova LGPD (veja abaixo) em vigor – que tem como objetivo aumentar a fiscalização e a proteção de dados pessoais – exige a formalização de alguns procedimentos e sua autorização para divulgarmos seus dados pessoais no nosso site.</div>
         </div>
     </div>
 @endsection
@@ -85,14 +85,6 @@
                 <label for="formacao" class="form-label fw-semibold">Formacao</label>
                 <input id="formacao" name="formacao" type="text" value="{{ old('formacao') }}" class="form-control form-control-lg @error('formacao') is-invalid @enderror" required>
                 @error('formacao')
-                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="col-md-6">
-                <label for="status" class="form-label fw-semibold">Status</label>
-                <input id="status" name="status" type="text" maxlength="15" value="{{ old('status') }}" class="form-control form-control-lg @error('status') is-invalid @enderror" required>
-                @error('status')
                     <div class="invalid-feedback d-block">{{ $message }}</div>
                 @enderror
             </div>
