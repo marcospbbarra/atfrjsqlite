@@ -6,6 +6,10 @@ use App\Http\Controllers\CarteirinhaController;
 use App\Http\Controllers\CadastroController;
 
 
+Route::get('/status', function () {
+    return response()->json(['status' => 'ok']);
+})->name('api.status');
+
 Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login'])->name('api.login');
 
 Route::middleware(['auth:sanctum', 'check.ip'])->group(function () {

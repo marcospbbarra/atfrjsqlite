@@ -10,6 +10,8 @@ use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Process\Process;
 use Illuminate\Support\Facades\DB;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class CarteirinhaController extends Controller
 {
@@ -58,71 +60,50 @@ class CarteirinhaController extends Controller
         return $this->generatePdfResponse($carteirinha);
     }
 
-    private function generatePdfResponse(Carteirinha $carteirinha): StreamedResponse
-    {
-        $backgroundImagePath = public_path('imgs/carteira2025.png');
-        $backgroundImageContents = file_get_contents($backgroundImagePath);
-
-        if ($backgroundImageContents === false) {
-            abort(500, 'Nao foi possivel carregar a imagem da carteirinha.');
-        }
-
-        $html = view('carteirinhas.pdf', [
-            'backgroundImage' => base64_encode($backgroundImageContents),
-            'carteirinha' => $carteirinha,
-        ])->render();
-
-        $temporaryDirectory = storage_path('app/temp');
-
-        if (! is_dir($temporaryDirectory)) {
-            mkdir($temporaryDirectory, 0755, true);
-        }
-
-        $htmlPath = $temporaryDirectory.'/'.Str::uuid().'.html';
-        $pdfPath = $temporaryDirectory.'/'.Str::uuid().'.pdf';
-
-        file_put_contents($htmlPath, $html);
-
-        $process = new Process([
-            '/usr/bin/google-chrome',
-            '--headless',
-            '--disable-gpu',
-            '--no-sandbox',
-            '--disable-dev-shm-usage',
-            '--allow-file-access-from-files',
-            '--no-pdf-header-footer',
-            '--print-to-pdf='.$pdfPath,
-            'file://'.$htmlPath,
-        ]);
-
-        $process->setTimeout(60);
-        $process->run();
-
-        @unlink($htmlPath);
-
-        if (! $process->isSuccessful() || ! file_exists($pdfPath)) {
-            @unlink($pdfPath);
-
-            abort(500, 'Nao foi possivel gerar o PDF da carteirinha.');
-        }
-
-        $fileName = 'carteirinha-'.$carteirinha->id.'.pdf';
-
-        return response()->streamDownload(function () use ($pdfPath): void {
-            $stream = fopen($pdfPath, 'rb');
-
-            if ($stream === false) {
-                return;
-            }
-
-            fpassthru($stream);
-            fclose($stream);
-            @unlink($pdfPath);
-        }, $fileName, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="'.$fileName.'"',
-        ]);
+private function generatePdfResponse(Carteirinha $carteirinha): StreamedResponse
+{
+    // 1. Carrega a imagem de fundo (mantendo sua lógica original)
+    $backgroundImagePath = public_path('imgs/carteira2025.png');
+    
+    if (!file_exists($backgroundImagePath)) {
+        abort(500, 'Imagem de fundo não encontrada.');
     }
+    
+    $backgroundImageContents = file_get_contents($backgroundImagePath);
+    $base64Image = base64_encode($backgroundImageContents);
+
+    // 2. Renderiza o HTML da View
+    $html = view('carteirinhas.pdf', [
+        'backgroundImage' => $base64Image,
+        'carteirinha' => $carteirinha,
+    ])->render();
+
+    // 3. Configura o Dompdf
+    $options = new Options();
+    $options->set('isHtml5ParserEnabled', true);
+    $options->set('isRemoteEnabled', true); // Útil se houver imagens externas
+
+    $dompdf = new Dompdf($options);
+    $dompdf->loadHtml($html);
+
+    // (Opcional) Define o tamanho do papel. Ex: A4, portrait ou landscape
+    $dompdf->setPaper('A4', 'portrait');
+
+    // 4. Renderiza o PDF em memória
+    $dompdf->render();
+    $pdfOutput = $dompdf->output();
+
+    $fileName = 'carteirinha-'.$carteirinha->id.'.pdf';
+
+    // 5. Retorna o stream para download/exibição
+    return response()->streamDownload(function () use ($pdfOutput): void {
+        echo $pdfOutput;
+    }, $fileName, [
+        'Content-Type' => 'application/pdf',
+        // 'inline' exibe no navegador, 'attachment' força o download
+        'Content-Disposition' => 'inline; filename="'.$fileName.'"',
+    ]);
+}
 
 public function sync(Request $request)
     {
