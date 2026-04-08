@@ -43,4 +43,10 @@ class CadastroController extends Controller
 
         return to_route('cadastro.create')->with('status', 'Cadastro salvo com sucesso.');
     }
+
+    public function index()
+    {
+        $cadastros = Cadastro::all();
+        return response()->json($cadastros, 200);
+    }    
 }

@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Process\Process;
+use Illuminate\Support\Facades\DB;
 
 class CarteirinhaController extends Controller
 {
@@ -122,4 +123,41 @@ class CarteirinhaController extends Controller
             'Content-Disposition' => 'inline; filename="'.$fileName.'"',
         ]);
     }
+
+public function sync(Request $request)
+    {
+        // 1. Valida se o que chegou é um array de registros
+        $data = $request->validate([
+            '*.id'        => 'required|integer',
+            '*.nome'      => 'required|string',
+            '*.categoria' => 'required|string',
+            '*.afiliacao' => 'required|integer',
+            '*.email'     => 'required|email',
+        ]);
+
+        try {
+            // 2. Inicia uma transação para segurança dos dados
+            DB::beginTransaction();
+
+            // 3. Deleta todos os registros atuais
+            Carteirinha::query()->delete();
+
+            // 4. Insere os novos registros em massa (mais rápido)
+            Carteirinha::insert($data);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Carteirinhas sincronizadas com sucesso!',
+                'count'   => count($data)
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Erro ao sincronizar dados',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }    
 }
