@@ -17,3 +17,10 @@ Route::middleware('throttle:25,1')->group(function () {
     Route::post('/cadastro', [CadastroController::class, 'store'])->name('cadastro.store');
     
 });
+
+
+Route::any('storage/{path}', function () {
+    abort(404);
+})->where('path', '.*');
+
+Route::any('_boost/browser-logs', fn() => abort(404));
