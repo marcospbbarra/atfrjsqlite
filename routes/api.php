@@ -13,7 +13,7 @@ Route::get('/status', function () {
 Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login'])->name('api.login');
 
 Route::middleware(['auth:sanctum', 'check.ip'])->group(function () {
-    Route::post('/carteirinhas/sync', [CarteirinhaController::class, 'sync']);
+    Route::post('/carteirinhas/sync', [CarteirinhaController::class, 'sync'])->middleware('throttle:5,60');
     
     // Nova rota para listar os cadastros
     Route::get('/cadastros', [CadastroController::class, 'index']);

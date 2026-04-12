@@ -23,6 +23,8 @@ class Carteirinha extends Model
     {
         return [
             'afiliacao' => 'integer',
+            'nome' => 'encrypted',
+            'email' => 'encrypted',            
         ];
     }
 }

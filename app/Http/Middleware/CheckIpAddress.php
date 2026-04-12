@@ -13,6 +13,7 @@ class CheckIpAddress
         '127.0.0.1',    // Localhost IPv4
         '::1',          // Localhost IPv6
         '192.168.1.50', // Exemplo de IP da sua rede
+        '192.99.46.28', // IP do servidor de produção
         // Adicione outros IPs aqui
     ];
 
